@@ -1,0 +1,318 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SYSADMIN
+  ADMIN
+  USER
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+}
+
+enum OrderType {
+  PICKUP
+  DELIVERY
+  DINE_IN
+}
+
+enum TransactionType {
+  OPENING
+  CLOSING
+  SALE
+  EXTRACTION
+  DEPOSIT
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  lastName  String
+  cedula    String   @unique
+  phone     String
+  email     String   @unique
+  address   String
+  username  String   @unique
+  password  String
+  role      UserRole @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sales             Sale[]
+  cashMovements     CashMovement[]
+  auditLogs         AuditLog[]
+  inventoryMovements InventoryMovement[]
+  cashTickets       CashTicket[]
+
+  @@map("users")
+}
+
+model Client {
+  id           String  @id @default(cuid())
+  name         String
+  lastName     String
+  email        String?
+  phone        String?
+  cedula       String? @unique
+  ruc          String? @unique
+  requiresInvoice Boolean @default(false)
+  isActive     Boolean @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  sales Sale[]
+
+  @@map("clients")
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal       @db.Decimal(10, 2)
+  category    String        @default("Otros")
+  status      ProductStatus @default(ACTIVE)
+  stock       Int?          // null = sin límite (X)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  saleItems     SaleItem[]
+  productIngredients ProductIngredient[]
+
+  @@map("products")
+}
+
+model ProductAddon {
+  id        String   @id @default(cuid())
+  name      String
+  price     Decimal  @db.Decimal(10, 2)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  saleItemAddons SaleItemAddon[]
+
+  @@map("product_addons")
+}
+
+model Ingredient {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  unit        String  // kg, litros, unidades, etc.
+  minStock    Decimal @db.Decimal(10, 2)
+  currentStock Decimal @db.Decimal(10, 2) @default(0)
+  cost        Decimal @db.Decimal(10, 2) @default(0)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  productIngredients ProductIngredient[]
+  inventoryMovements InventoryMovement[]
+
+  @@map("ingredients")
+}
+
+model ProductIngredient {
+  id           String  @id @default(cuid())
+  productId    String
+  ingredientId String
+  quantity     Decimal @db.Decimal(10, 2)
+
+  // Relations
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, ingredientId])
+  @@map("product_ingredients")
+}
+
+model InventoryMovement {
+  id           String   @id @default(cuid())
+  ingredientId String
+  type         String   // ENTRY, EXIT
+  quantity     Decimal  @db.Decimal(10, 2)
+  reason       String?
+  userId       String
+  createdAt    DateTime @default(now())
+
+  // Relations
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@map("inventory_movements")
+}
+
+model Sale {
+  id            String        @id @default(cuid())
+  clientId      String?
+  userId        String
+  total         Decimal       @db.Decimal(10, 2)
+  discount      Decimal       @db.Decimal(10, 2) @default(0)
+  deliveryCost  Decimal       @db.Decimal(10, 2) @default(0)
+  paymentMethod PaymentMethod
+  orderType     OrderType     @default(PICKUP)
+  orderNumber   String        @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  client     Client?    @relation(fields: [clientId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  items      SaleItem[]
+  cashMovement CashMovement?
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String  @id @default(cuid())
+  saleId    String
+  productId String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  subtotal  Decimal @db.Decimal(10, 2)
+  secondFlavorProductId String?
+  secondFlavorProductName String?
+  comments String?
+  otherIngredient String?
+
+  // Relations
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+  addons  SaleItemAddon[]
+
+  @@map("sale_items")
+}
+
+model SaleItemAddon {
+  id        String       @id @default(cuid())
+  saleItemId String
+  addonId   String
+  quantity  Int
+
+  // Relations
+  saleItem SaleItem      @relation(fields: [saleItemId], references: [id], onDelete: Cascade)
+  addon    ProductAddon  @relation(fields: [addonId], references: [id])
+
+  @@map("sale_item_addons")
+}
+
+model CashRegister {
+  id          String   @id @default(cuid())
+  isOpen      Boolean  @default(false)
+  currentBalance Decimal @db.Decimal(10, 2) @default(0)
+  lastOpenedAt DateTime?
+  lastClosedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  movements CashMovement[]
+  cashTickets CashTicket[]
+
+  @@map("cash_register")
+}
+
+model CashMovement {
+  id          String          @id @default(cuid())
+  cashRegisterId String
+  userId      String
+  type        TransactionType
+  amount      Decimal         @db.Decimal(10, 2)
+  description String?
+  saleId      String?         @unique
+  createdAt   DateTime        @default(now())
+
+  // Relations
+  cashRegister CashRegister @relation(fields: [cashRegisterId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  sale         Sale?        @relation(fields: [saleId], references: [id])
+
+  @@map("cash_movements")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  tableName String?
+  recordId  String?
+  oldValues Json?
+  newValues Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model SystemConfig {
+  id                    String   @id @default(cuid())
+  restaurantName        String   @default("Pizza System")
+  restaurantAddress     String   @default("Dirección del restaurante")
+  restaurantPhone       String   @default("+595 21 123 456")
+  restaurantRuc         String   @default("12345678-9")
+  ivaRate               Decimal  @db.Decimal(5, 2) @default(10)
+  printerIp             String   @default("192.168.1.100")
+  printerPort           Int      @default(9100)
+  paperWidth            Int      @default(58)
+  logoUrl               String   @default("")
+  footerMessage         String   @default("¡Gracias por su compra!")
+  passwordExpiryDays    Int      @default(90)
+  maxFailedAttempts     Int      @default(5)
+  sessionTimeoutMinutes Int      @default(60)
+  enableAuditLog        Boolean  @default(true)
+  autoBackup            Boolean  @default(false)
+  backupFrequency       String   @default("weekly")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("system_config")
+}
+
+model CashTicket {
+  id            String   @id @default(cuid())
+  cashRegisterId String
+  userId        String
+  openedAt      DateTime
+  closedAt      DateTime?
+  hoursOpen     Decimal  @db.Decimal(5, 2)
+  cashTotal     Decimal  @db.Decimal(10, 2)
+  cardTotal     Decimal  @db.Decimal(10, 2)
+  transferTotal Decimal  @db.Decimal(10, 2)
+  totalSales    Decimal  @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+
+  // Relations
+  cashRegister CashRegister @relation(fields: [cashRegisterId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@map("cash_tickets")
+}

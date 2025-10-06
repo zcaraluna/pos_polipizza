@@ -1,0 +1,289 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+package-lock.json
+
+# Testing
+/coverage
+*.test.js
+*.test.ts
+*.test.tsx
+*.spec.js
+*.spec.ts
+*.spec.tsx
+
+# Next.js
+/.next/
+/out/
+.next/
+out/
+
+# Production builds
+/build
+/dist
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Prisma
+/prisma/migrations
+prisma/dev.db
+prisma/dev.db-journal
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+storybook-static
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+*.exe
+*.msi
+*.msm
+*.msp
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+
+# Linux
+*~
+
+# Vercel
+.vercel
+
+# Turbo
+.turbo
+
+# Sentry
+.sentryclirc
+
+# Local development
+*.local
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# Application specific
+# Printer drivers and executables
+*.exe
+*.zip
+*.dmg
+*.pkg
+*.deb
+*.rpm
+
+# USB device files (if any)
+usb
+USB*
+
+# Generated files
+*.generated.*
+*.auto.*
+
+# PDFs and documents (if they contain sensitive data)
+# Uncomment if needed:
+# *.pdf
+# *.doc
+# *.docx
+
+# Image files (if they contain sensitive data)
+# Uncomment if needed:
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
+# *.svg
+
+# Base64 encoded files (if they contain sensitive data)
+# Uncomment if needed:
+# *.base64
+# *base64.txt
+
+# Configuration files with sensitive data
+config.local.*
+settings.local.*
+
+# Database dumps
+*.sql
+*.dump
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# Docker
+.dockerignore
+Dockerfile.local
+docker-compose.override.yml
+
+# Kubernetes
+*.kubeconfig
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# IDE specific
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# System Files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
